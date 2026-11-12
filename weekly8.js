@@ -153,11 +153,20 @@ for (const z of [-2.5, -1.25, 0, 1.25, 2.5]) {
 
 
 const loader = new GLTFLoader();
+let kingMixer;
+
 loader.load('./King by Quaternius - I1gTjmuK2m.glb', function(gltf) {
     const king = gltf.scene;
     king.position.set(9, 0, 8);
     king.scale.set(2, 2, 2);
     scene.add(king);
+
+    kingMixer = new THREE.AnimationMixer(king);
+    const deathClip = THREE.AnimationClip.findByName(gltf.animations, 'CharacterArmature|Death');
+    const deathAction = kingMixer.clipAction(deathClip);
+    deathAction.setLoop(THREE.LoopOnce, 1);
+    deathAction.clampWhenFinished = true;
+    deathAction.play();
 });
 
 loader.load('./Catapult by Poly by Google - 9ahVI0EijEi.glb', function(gltf) {
@@ -247,9 +256,13 @@ window.addEventListener("resize", () => {
 // ----------------------------------------------------
 // Animation Loop
 // ----------------------------------------------------
+const clock = new THREE.Clock();
+
 function animate() {
 
     requestAnimationFrame(animate);
+
+    kingMixer?.update(clock.getDelta());
 
     cube.rotation.y += 0.01;
 
